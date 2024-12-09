@@ -116,13 +116,7 @@ describe("Swords", function () {
     await expect(
       swords.connect(minter).mergeNFTs([tokenOne, tokenTwo])
     ).not.to.be.reverted;
-    console.log("After merge");
-    expect(await swords.ownerOf(tokenOne)).to.be(0);
-    console.log("Before merge");
-    expect(await swords.ownerOf(tokenTwo)).to.be(0);
-
-
-
+    expect(await swords.checkNoneExist([tokenOne, tokenTwo])).to.be.true;
 
     //const minterBalanceNew = await provider.getBalance(minter.address);
   });

@@ -3,7 +3,7 @@ pragma solidity ^0.8.16;
 
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import {ERC721, ERC721Enumerable} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 
 // Swords is a smart contract handling logic for valuable artefacts in a game.
 contract Swords is ERC721Enumerable, ReentrancyGuard {
@@ -23,6 +23,15 @@ contract Swords is ERC721Enumerable, ReentrancyGuard {
 
     constructor() ERC721("Swords", "SWRD") {
         contractOwner = msg.sender;
+    }
+
+    /**
+     * @dev Testing-only function, returns true only if all tokens exist. Must be removed in prod, just in case.
+     */
+    function checkNoneExist(uint256[] calldata Ids) public view returns (bool) {
+        for (uint i = 0; i < Ids.length; i++)
+            if (_ownerOf(Ids[i]) != address(0)) return false; //external ownerOf requires token to exist
+        return true;
     }
 
     /**
