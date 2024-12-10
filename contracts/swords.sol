@@ -74,30 +74,34 @@ contract Swords is ERC721Enumerable, ReentrancyGuard {
     function mergeNFTs(uint256[] calldata tokenIds) external nonReentrant {
         require(tokenIds.length >= 2, "Need at least two NFTs to merge");
         require(tokenIds.length <= 20, "Cannot merge more than 20 NFTs in one call");
-        require(mergeReward * tokenIds.length <= address(this).balance, "Not enough balance for merge rewards");
+        require(mergeReward * tokenIds.length <= address(this).balance, "Not enough balance for merges, wait for mints");
 
         uint256 entropy = 0;
 
-        // Verify ownership of NFTs, calculate entropy, and burn them
-        for (uint256 i = 0; i < tokenIds.length; i++) {
-            require(ownerOf(tokenIds[i]) == msg.sender, "Not the owner of all NFTs");
-            
-            // Add the entropy of the current token to the total
-            entropy += entropyMap[tokenIds[i]];
+        // Worst case we can reach type(uint256).max in ~28 20x-merges
+        // Highly unlikely, but lets go unchecked. Also wrapping around makes the game more fun
+        unchecked {
+            // Verify ownership of NFTs, calculate entropy, and burn them
+            for (uint256 i = 0; i < tokenIds.length; i++) {
+                require(ownerOf(tokenIds[i]) == msg.sender, "Not the owner of all NFTs");
+                
+                // Add the entropy of the current token to the total
+                entropy += entropyMap[tokenIds[i]];
 
-            _burn(tokenIds[i]);
-            delete entropyMap[tokenIds[i]];
-        }
+                _burn(tokenIds[i]);
+                delete entropyMap[tokenIds[i]];
+            }
 
-        // Get a random value between 0 and 99
-        uint256 randomFactor = getRandom() % 100; 
+            // Get a random value between 0 and 99
+            uint256 randomFactor = getRandom() % 100; 
 
-        if (randomFactor < 25) {
-            // 25% chance to get +25%
-            entropy = (entropy * 125) / 100;
-        } else if (randomFactor < 35) {
-            // 10% chance to get -10%
-            entropy = (entropy * 90) / 100;
+            if (randomFactor < 25) {
+                // 25% chance to get +25%
+                entropy = (entropy * 125) / 100;
+            } else if (randomFactor < 35) {
+                // 10% chance to get -10%
+                entropy = (entropy * 90) / 100;
+            }
         }
 
         // Create a new NFT with the resulting entropy.
