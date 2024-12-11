@@ -54,3 +54,5 @@ This will make it much harder, if not impossible, for others to use this functio
 Interestingly, such attacks are [quite popular](https://owasp.org/www-project-smart-contract-top-10/).
 
 To fix the vulnerability, one needs to limit gas passed to `Swords.mergeNFTs()`
+
+P.S. Weird enough, but Remix VM cannot properly handle "out of gas", seems like it relies on some hack with gas amount to revert transactions. Therefore to avoid further delays with this test task, I am testing using timeout. Meh.
