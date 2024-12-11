@@ -6,7 +6,7 @@ const { ethers } = require("hardhat");
 //Opinion: copypaste is not a crime when it comes to autotests, maybe even good
 //So objective is tests to be simple and flat as possible
 describe("Swords", function () {
- /* it("Minting zero number of NFTs should fail", async function () {
+ it("Minting zero number of NFTs should fail", async function () {
     const [owner, minter] = await ethers.getSigners();
     const Swords = await ethers.getContractFactory("Swords");
     const swords = await Swords.deploy();
@@ -159,7 +159,7 @@ describe("Swords", function () {
     await expect(
         swords.connect(minter).mergeNFTs(arr)
       ).to.be.revertedWith("Cannot merge more than 20 NFTs in one call");
-  });*/
+  });
   it("Merge should revert if not enough balance", async function () {
     const [owner, minter] = await ethers.getSigners();
     const Swords = await ethers.getContractFactory("Swords");
@@ -178,7 +178,7 @@ describe("Swords", function () {
         swords.connect(minter).mergeNFTs([tokenOne, tokenTwo])
       ).to.be.revertedWith("Not enough balance for merges, wait for mints");
   });
-  it("Above is data of always passing \"statistical\" test for swords boosting and nerfing", async function () {
+  it("Above is data of always passing \"statistics\" test for swords boosting and nerfing", async function () {
     const [owner, minter] = await ethers.getSigners();
     const Swords = await ethers.getContractFactory("Swords");
     const swords = await Swords.deploy();
@@ -220,6 +220,7 @@ describe("Swords", function () {
     // results output 
     console.log("     Out of 100 runs "+boosted+" boosted, "+nerfed+" nerfed");
     expect(1);
+  });
 
 
 });
