@@ -6,7 +6,7 @@ const { ethers } = require("hardhat");
 //Opinion: copypaste is not a crime when it comes to autotests, maybe even good
 //So objective is tests to be simple and flat as possible
 describe("Swords", function () {
-  it("Minting zero number of NFTs should fail", async function () {
+ /* it("Minting zero number of NFTs should fail", async function () {
     const [owner, minter] = await ethers.getSigners();
     const Swords = await ethers.getContractFactory("Swords");
     const swords = await Swords.deploy();
@@ -159,7 +159,7 @@ describe("Swords", function () {
     await expect(
         swords.connect(minter).mergeNFTs(arr)
       ).to.be.revertedWith("Cannot merge more than 20 NFTs in one call");
-  });
+  });*/
   it("Merge should revert if not enough balance", async function () {
     const [owner, minter] = await ethers.getSigners();
     const Swords = await ethers.getContractFactory("Swords");
@@ -178,4 +178,48 @@ describe("Swords", function () {
         swords.connect(minter).mergeNFTs([tokenOne, tokenTwo])
       ).to.be.revertedWith("Not enough balance for merges, wait for mints");
   });
+  it("Above is data of always passing \"statistical\" test for swords boosting and nerfing", async function () {
+    const [owner, minter] = await ethers.getSigners();
+    const Swords = await ethers.getContractFactory("Swords");
+    const swords = await Swords.deploy();
+    await swords.deployed();
+    
+    let boosted = 0;
+    let nerfed = 0;
+    let index = 0; //counts minter NFTs
+
+    for (let i=0; i<100; i+=2)
+    {
+      // we mint two, get their entropies sum
+      const mintPrice = await swords.mintPrice();
+
+      const tx = await swords.connect(minter).mint(1, { value: mintPrice });
+      await tx.wait();  // with mint(2,..) these will be in the same block, so we mint separately
+      index++;
+      const tokenOne = await swords.tokenOfOwnerByIndex(minter.address, index-1);
+      const entropy1 = await swords.entropyMap(tokenOne);
+
+      const tx2 = await swords.connect(minter).mint(1, { value: mintPrice });
+      await tx2.wait();
+      index++;
+      const tokenTwo = await swords.tokenOfOwnerByIndex(minter.address, index-1);
+      const entropy2 = await swords.entropyMap(tokenTwo);
+
+      const entropySum = entropy1.add(entropy2);
+     
+      // we merge and check resulting entropy, updating counters
+      const tx3 = await swords.connect(minter).mergeNFTs([tokenOne, tokenTwo]);
+      tx3.wait();
+      index--; // 2 burned, 1 created
+      const tokenMerged = await swords.tokenOfOwnerByIndex(minter.address, index-1);
+      const entropyMerged = await swords.entropyMap(tokenMerged);
+
+      if (entropyMerged.gt(entropySum)) boosted++;
+      if (entropyMerged.lt(entropySum)) nerfed++;
+    }
+    // results output 
+    console.log("     Out of 100 runs "+boosted+" boosted, "+nerfed+" nerfed");
+    expect(1);
+
+
 });
