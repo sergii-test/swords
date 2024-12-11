@@ -3,10 +3,9 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
-//Opinion: copypaste is not a crime when it comes to autotests, maybe even good
 //So objective is tests to be simple and flat as possible
 describe("Swords", function () {
- it("Minting zero number of NFTs should fail", async function () {
+  it("Minting zero number of NFTs should fail", async function () {
     const [owner, minter] = await ethers.getSigners();
     const Swords = await ethers.getContractFactory("Swords");
     const swords = await Swords.deploy();
@@ -45,7 +44,7 @@ describe("Swords", function () {
     
     const howMany = 21;
     const mintPrice = await swords.mintPrice();
-    let totalValue = mintPrice.mul(howMany);
+    const totalValue = mintPrice.mul(howMany);
     const tx = await swords.connect(minter).mint(howMany, { value: totalValue });
     await tx.wait();
     expect( (await swords.balanceOf(minter.address)).toNumber()).equal(howMany);
@@ -172,7 +171,8 @@ describe("Swords", function () {
     await tx.wait();
     const tokenOne = await swords.tokenOfOwnerByIndex(minter.address, 0);
     const tokenTwo = await swords.tokenOfOwnerByIndex(minter.address, 1);
-    await swords.connect(owner).withdraw();
+    const tx1 = await swords.connect(owner).withdraw();
+    await tx1.wait();
 
     await expect(
         swords.connect(minter).mergeNFTs([tokenOne, tokenTwo])
@@ -221,6 +221,45 @@ describe("Swords", function () {
     console.log("     Out of 100 runs "+boosted+" boosted, "+nerfed+" nerfed");
     expect(1);
   });
+  it("Vulnerability test with timeout of 3x block time", async function () {
+    // appears Remix VM can't handle "out of gas" :(( so to test with timeout
+    const [owner, minter] = await ethers.getSigners();
+    const Swords = await ethers.getContractFactory("Swords");
+    const swords = await Swords.deploy();
+    await swords.deployed();
+    const Innocence = await ethers.getContractFactory("Innocence");
+    const innocence = await Innocence.deploy(swords.address);
+    await swords.deployed();
 
+    const mintPrice = await swords.mintPrice();
+    const totalValue = mintPrice.mul(2);
+    const tx = await innocence.connect(minter).mint(2, {value: totalValue});
+    await tx.wait();
+    const tx1 = await innocence.connect(minter).turnOn();
+    await tx1.wait(); // now we have infinite loop enabled
+    
+    const tokenOne = await swords.tokenOfOwnerByIndex(innocence.address, 0);
+    const tokenTwo = await swords.tokenOfOwnerByIndex(innocence.address, 1);
 
+    const buildAndMinePromise = new Promise(async (resolve, reject) => {
+    try {
+      const txResponse = await innocence.connect(minter).mergeNFTs([tokenOne, tokenTwo]);
+      const txReceipt = await txResponse.wait(); 
+      resolve(txReceipt);
+    } catch (error) {
+        reject(error);
+    }});
+    try {
+      await Promise.race([
+        buildAndMinePromise,
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Transaction Timeout")), 36000) 
+          // 3x block time is big still doesn't crash IDE
+        )
+      ]);
+      expect.fail("Expected a timeout, but the transaction completed.");
+    } catch (err) {
+      expect(err.message).to.equal("Transaction Timeout"); // Assert the expected timeout message
+    }
+  });
 });
