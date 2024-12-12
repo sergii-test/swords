@@ -44,7 +44,7 @@ function getRandom() internal view returns(uint256) {
 Randomness obtained in such a way can be easily manipulated by block proposers. This vulnerability is here with the sole purpose of being a red rag and distracting an inexperienced auditor. A proper way to fix is to obtain randomness from some good oracle.
 
 The second vulnerability is a real one. It works in a wider in-game context. Because obtaining swords with advanced capabilities is to a large extent a game of chance, we predict advanced swords will trade at high prices. 
-With the game becoming popular, this economics, in turn, can create economic sense for owner(s) of rare, and so highly priced, swords, to invest into preventing others from minting. 
+With the game becoming popular, this economics, in turn, can create economic sense for owner(s) of rare, and so highly priced, swords, to invest into preventing others from minting advanced swords by merges.
 
 Such a possibility is illustrated by the `Innocence` smart contract. It uses the fact that whenever the NFT receiver is not EOA but a smart contract, ERC721 implementation requires it to implement the `IERC721Receiver` interface. 
 And invokes the `onERC721Received()` callback on NFT status changes (minting, transfers, burn). My contract `Innocence` has an infinite loop in the callback implementation. 
