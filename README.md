@@ -49,7 +49,6 @@ With the game becoming popular, this economics, in turn, can create economic sen
 Such a possibility is illustrated by the `Innocence` smart contract. It uses the fact that whenever the NFT receiver is not EOA but a smart contract, ERC721 implementation requires it to implement the `IERC721Receiver` interface. 
 And invokes the `onERC721Received()` callback on NFT status changes (minting, transfers, burn). My contract `Innocence` has an infinite loop in the callback implementation. 
 An attacker, willing to invest in preventing others from obtaining high-value NFTs, can implement a DoS attack by repeatedly calling `mergeNFTs()` from `Innocence`, with the sole purpose for these transactions to fail with "out of gas".
-This will make it much harder, if not impossible, for others to use this functionality.
 
 Interestingly, such attacks are [quite popular](https://owasp.org/www-project-smart-contract-top-10/).
 
