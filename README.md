@@ -1,4 +1,4 @@
-# Vulnerability injection task
+# Vulnerability injection exercise
 ## 1. How To
 ### Getting code
 Open the Remix IDE at [https://remix.ethereum.org](https://remix.ethereum.org)  
